@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1036881641417",
+    "project_id": "sewa-lapangan-2026",
+    "storage_bucket": "sewa-lapangan-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036881641417:android:dba1d846f8e52ef3f43218",
+        "android_client_info": {
+          "package_name": "com.example.sewalapangan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_VnCVWT9IS1XVxRLH5tTj321TIa8xbgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036881641417:android:4ada225ca62cebc7f43218",
+        "android_client_info": {
+          "package_name": "com.example.sewalapangann"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_VnCVWT9IS1XVxRLH5tTj321TIa8xbgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

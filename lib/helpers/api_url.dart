@@ -1,11 +1,11 @@
 class ApiUrl {
 
   static const String baseUrl =
-      "http://10.0.2.2/sewalapangann_api";
+      "http://localhost/projek_mobile/public";
 
   static const String login =
-      "$baseUrl/auth/login.php";
+      "$baseUrl/api/login";
 
   static const String register =
-      "$baseUrl/auth/register.php";
+      "$baseUrl/api/register";
 }

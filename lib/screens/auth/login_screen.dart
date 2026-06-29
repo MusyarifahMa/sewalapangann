@@ -10,98 +10,56 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() =>
-      _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState
-    extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
+  final emailController = TextEditingController();
 
-  final emailController =
-      TextEditingController();
-
-  final passwordController =
-      TextEditingController();
+  final passwordController = TextEditingController();
 
   bool isLoading = false;
 
   Future<void> login() async {
-
     try {
-
       setState(() {
         isLoading = true;
       });
 
-      final response =
-          await ApiService.post(
-        ApiUrl.login,
-        {
-          "email":
-              emailController.text.trim(),
-          "password":
-              passwordController.text.trim(),
-        },
-      );
+      final response = await ApiService.post(ApiUrl.login, {
+        "login": emailController.text.trim(),
+        "password": passwordController.text.trim(),
+      });
 
-      if (response["success"] == true) {
+      if (response["status"] == 200) {
+        final user = response["data"];
 
-        final user = response["user"];
+        SharedPreferences pref = await SharedPreferences.getInstance();
 
-        SharedPreferences pref =
-            await SharedPreferences.getInstance();
+        await pref.setInt("id", int.parse(user["id"].toString()));
 
-        await pref.setInt(
-          "id",
-          int.parse(user["id"].toString()),
-        );
+        await pref.setString("nama", user["username"].toString());
 
-        await pref.setString(
-          "nama",
-          user["username"].toString(),
-        );
-
-        await pref.setString(
-          "email",
-          user["email"].toString(),
-        );
+        await pref.setString("email", user["email"].toString());
 
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (_) => const MainNavigation(),
-            ),
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
             (route) => false,
           );
         }
       } else {
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          SnackBar(
-            content: Text(
-              response["message"],
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(response["message"])));
       }
-
     } catch (e) {
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-          ),
-        ),
-      );
-
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
-
       if (mounted) {
-
         setState(() {
           isLoading = false;
         });
@@ -111,23 +69,16 @@ class _LoginScreenState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor:
-          const Color(0xffDCC2E8),
+      backgroundColor: const Color(0xffDCC2E8),
 
       body: Padding(
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 30,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 30),
 
         child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-
             Container(
               width: 120,
               height: 120,
@@ -137,10 +88,7 @@ class _LoginScreenState
                 border: Border.all(),
               ),
 
-              child: const Icon(
-                Icons.person_outline,
-                size: 60,
-              ),
+              child: const Icon(Icons.person_outline, size: 60),
             ),
 
             const SizedBox(height: 40),
@@ -154,12 +102,8 @@ class _LoginScreenState
                 filled: true,
                 fillColor: Colors.white,
 
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    10,
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -167,8 +111,7 @@ class _LoginScreenState
             const SizedBox(height: 15),
 
             TextField(
-              controller:
-                  passwordController,
+              controller: passwordController,
 
               obscureText: true,
 
@@ -178,12 +121,8 @@ class _LoginScreenState
                 filled: true,
                 fillColor: Colors.white,
 
-                border:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    10,
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -194,30 +133,20 @@ class _LoginScreenState
               width: double.infinity,
 
               child: ElevatedButton(
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.purple,
-                  padding:
-                      const EdgeInsets.symmetric(
-                    vertical: 14,
-                  ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
 
-                onPressed:
-                    isLoading ? null : login,
+                onPressed: isLoading ? null : login,
 
                 child: isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                    ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
                         "LOGIN",
                         style: TextStyle(
-                          color:
-                              Colors.white,
-                          fontWeight:
-                              FontWeight.bold,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
               ),
@@ -226,24 +155,16 @@ class _LoginScreenState
             const SizedBox(height: 20),
 
             Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
 
               children: [
-
-                const Text(
-                  "Belum punya akun? ",
-                ),
+                const Text("Belum punya akun? "),
 
                 GestureDetector(
                   onTap: () {
-
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const RegisterScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     );
                   },
 
@@ -251,8 +172,7 @@ class _LoginScreenState
                     "Buat akun",
                     style: TextStyle(
                       color: Colors.purple,
-                      fontWeight:
-                          FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

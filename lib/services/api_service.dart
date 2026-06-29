@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "http://10.0.2.2/sewalapangann_api";
+  static const String baseUrl = "http://localhost/projek_mobile/public";
 
   // Fungsi baru untuk Update Profil
   static Future<Map<String, dynamic>> updateProfile({

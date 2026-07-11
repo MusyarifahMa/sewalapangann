@@ -82,7 +82,12 @@ class DetailScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const JadwalScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => JadwalScreen(
+                            image: image,
+                            namaLapangan: namaLapangan,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -111,8 +116,7 @@ class DetailScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => BookingScreen(
                             image: image,
-                            namaLapangan:
-                                namaLapangan, 
+                            namaLapangan: namaLapangan,
                           ),
                         ),
                       );

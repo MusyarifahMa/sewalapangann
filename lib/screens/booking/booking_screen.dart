@@ -3,12 +3,16 @@ import '../payment/payment_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   final String image;
-  final String namaLapangan; // Data yang diterima dari CategoryScreen
+  final String namaLapangan;
+  final String? jamDefault;
+  final String? hariDefault;
 
   const BookingScreen({
-    super.key, 
-    required this.image, 
-    required this.namaLapangan
+    super.key,
+    required this.image,
+    required this.namaLapangan,
+    this.jamDefault,
+    this.hariDefault,
   });
 
   @override
@@ -17,34 +21,93 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   final tanggalController = TextEditingController();
-  final namaPemesanController = TextEditingController();
-  
-  String jam = '10.00'; 
+  late String jam;
   String paket = '2 Jam';
 
-  final List<String> daftarJam = ['10.00', '13.00', '16.00', '19.00'];
+  final List<String> daftarJam = ['08.00', '10.00', '13.00', '16.00', '19.00'];
 
-  final Map<String, int> hargaPaket = {
-    '2 Jam': 400000,
-    '4 Jam': 700000,
+  final Map<String, int> hargaPaket = {'2 Jam': 400000, '4 Jam': 700000};
+
+  // Map hari ke angka DateTime (1=Senin, 7=Minggu)
+  final Map<String, List<int>> hariMap = {
+    'Senin - Kamis': [1, 2, 3, 4],
+    "Jum'at - Minggu": [5, 6, 7],
   };
 
-  InputDecoration _dec(String label, IconData icon) => InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: const Color(0xFF7B3FA0)),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFF7B3FA0), width: 1.5)),
-      );
+  @override
+  void initState() {
+    super.initState();
+    jam = widget.jamDefault ?? '10.00';
+    if (!daftarJam.contains(jam)) {
+      daftarJam.add(jam);
+    }
+  }
 
-  String _bulan(int m) => ['','Januari','Februari','Maret','April','Mei','Juni',
-      'Juli','Agustus','September','Oktober','November','Desember'][m];
+  bool _isHariValid(DateTime date) {
+    if (widget.hariDefault == null) return true;
+    final allowedDays = hariMap[widget.hariDefault!];
+    if (allowedDays == null) return true;
+    return allowedDays.contains(date.weekday);
+  }
+
+  Future<void> _pilihTanggal() async {
+    DateTime initialDate = DateTime.now();
+
+    // Cari tanggal awal yang valid
+    while (!_isHariValid(initialDate)) {
+      initialDate = initialDate.add(const Duration(days: 1));
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+      selectableDayPredicate: (date) => _isHariValid(date),
+    );
+
+    if (picked != null) {
+      setState(() {
+        tanggalController.text =
+            '${picked.day} ${_bulan(picked.month)} ${picked.year}';
+      });
+    }
+  }
+
+  InputDecoration _dec(String label, IconData icon) => InputDecoration(
+    labelText: label,
+    prefixIcon: Icon(icon, color: const Color(0xFF7B3FA0)),
+    filled: true,
+    fillColor: Colors.white,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(15),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(15),
+      borderSide: const BorderSide(color: Color(0xFF7B3FA0), width: 1.5),
+    ),
+  );
+
+  String _bulan(int m) => [
+    '',
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ][m];
 
   @override
   void dispose() {
     tanggalController.dispose();
-    namaPemesanController.dispose();
     super.dispose();
   }
 
@@ -55,8 +118,14 @@ class _BookingScreenState extends State<BookingScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFDCC2E8),
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black87), onPressed: () => Navigator.pop(context)),
-        title: const Text('Booking Lapangan', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Booking Lapangan',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -64,11 +133,15 @@ class _BookingScreenState extends State<BookingScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset(widget.image, height: 200, width: double.infinity, fit: BoxFit.cover),
+              child: Image.asset(
+                widget.image,
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 20),
 
-            // Nama Lapangan Otomatis
             TextFormField(
               initialValue: widget.namaLapangan,
               readOnly: true,
@@ -76,43 +149,72 @@ class _BookingScreenState extends State<BookingScreen> {
             ),
             const SizedBox(height: 14),
 
-            // Tanggal
+            // Info hari yang dipilih
+            if (widget.hariDefault != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7B3FA0).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF7B3FA0)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      color: Color(0xFF7B3FA0),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Hanya bisa booking hari: ${widget.hariDefault}',
+                      style: const TextStyle(
+                        color: Color(0xFF7B3FA0),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             TextField(
               controller: tanggalController,
               readOnly: true,
-              decoration: _dec('Tanggal Booking', Icons.calendar_today_outlined),
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 90)),
-                );
-                if (picked != null) {
-                  setState(() {
-                    tanggalController.text = '${picked.day} ${_bulan(picked.month)} ${picked.year}';
-                  });
-                }
-              },
+              decoration: _dec(
+                'Tanggal Booking',
+                Icons.calendar_today_outlined,
+              ),
+              onTap: _pilihTanggal,
             ),
             const SizedBox(height: 14),
 
-            // Dropdown Jam Terbatas
             DropdownButtonFormField<String>(
               value: jam,
               decoration: _dec('Pilih Jam', Icons.access_time_outlined),
-              items: daftarJam.map((j) => DropdownMenuItem(value: j, child: Text(j))).toList(),
+              items: daftarJam
+                  .map((j) => DropdownMenuItem(value: j, child: Text(j)))
+                  .toList(),
               onChanged: (v) => setState(() => jam = v!),
             ),
             const SizedBox(height: 14),
 
-            // Paket
             DropdownButtonFormField<String>(
               value: paket,
               decoration: _dec('Paket Durasi', Icons.timer_outlined),
               items: const [
-                DropdownMenuItem(value: '2 Jam', child: Text('Paket 1 (2 Jam)')),
-                DropdownMenuItem(value: '4 Jam', child: Text('Paket 2 (4 Jam)')),
+                DropdownMenuItem(
+                  value: '2 Jam',
+                  child: Text('Paket 1 (2 Jam)'),
+                ),
+                DropdownMenuItem(
+                  value: '4 Jam',
+                  child: Text('Paket 2 (4 Jam)'),
+                ),
               ],
               onChanged: (v) => setState(() => paket = v!),
             ),
@@ -122,10 +224,17 @@ class _BookingScreenState extends State<BookingScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7B3FA0), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B3FA0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
                 onPressed: () {
                   if (tanggalController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih tanggal dulu!')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Pilih tanggal dulu!')),
+                    );
                     return;
                   }
                   Navigator.push(
@@ -141,7 +250,13 @@ class _BookingScreenState extends State<BookingScreen> {
                     ),
                   );
                 },
-                child: const Text('PESAN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'PESAN',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

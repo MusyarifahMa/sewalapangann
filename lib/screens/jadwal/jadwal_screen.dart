@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import '../booking/booking_screen.dart';
 
 class JadwalScreen extends StatelessWidget {
-  const JadwalScreen({super.key});
+  final String image;
+  final String namaLapangan;
+
+  const JadwalScreen({
+    super.key,
+    required this.image,
+    required this.namaLapangan,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, String>> jadwalList = [
+      {'hari': 'Senin - Kamis', 'jam': '08.00 - 10.00 WIB'},
+      {'hari': "Jum'at - Minggu", 'jam': '16.00 - 19.00 WIB'},
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFFDCC2E8),
       appBar: AppBar(
@@ -20,10 +33,12 @@ class JadwalScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header "Detail Jadwal" — sesuai mockup: chip ungu besar
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF7B3FA0),
                   borderRadius: BorderRadius.circular(30),
@@ -31,7 +46,11 @@ class JadwalScreen extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: const [
-                    Icon(Icons.calendar_month_outlined, color: Colors.white, size: 22),
+                    Icon(
+                      Icons.calendar_month_outlined,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                     SizedBox(width: 10),
                     Text(
                       'Detail Jadwal',
@@ -45,10 +64,7 @@ class JadwalScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // Card putih berisi jadwal
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -60,46 +76,67 @@ class JadwalScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Jadwal yang tersedia:',
+                    'Pilih jadwal yang tersedia:',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Slot jadwal 1
-                  _jadwalChip('Senin - Kamis | 08.00 - 10.00 WIB'),
-
-                  const SizedBox(height: 10),
-
-                  // Slot jadwal 2
-                  _jadwalChip("Jum'at - Minggu | 16.00 - 19.00 WIB"),
+                  ...jadwalList.map(
+                    (jadwal) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BookingScreen(
+                                image: image,
+                                namaLapangan: namaLapangan,
+                                jamDefault: jadwal['jam']!.split(' - ')[0],
+                                hariDefault: jadwal['hari']!,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7B3FA0),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${jadwal['hari']} | ${jadwal['jam']}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _jadwalChip(String text) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF7B3FA0),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );

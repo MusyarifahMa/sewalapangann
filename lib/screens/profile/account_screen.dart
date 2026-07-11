@@ -1,8 +1,4 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import '../auth/login_screen.dart';
@@ -25,11 +21,6 @@ class _AccountScreenState extends State<AccountScreen> {
   bool isSaving = false;
   bool isEditing = false;
 
-  String _oldUsername =
-      ''; // buat manggil endpoint (username lama sebelum diedit)
-  String? _avatarUrl;
-  File? _pickedAvatar;
-
   @override
   void initState() {
     super.initState();
@@ -38,76 +29,41 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    final username = prefs.getString("nama") ?? "";
-    _oldUsername = username;
-
-    final data = await ApiService.getProfileScraped(username);
-
-    if (data != null) {
-      setState(() {
-        usernameController.text = data['username'] ?? '';
-        emailController.text = data['email'] ?? '';
-        phoneController.text = data['no_tlp'] ?? '';
-        birthDateController.text = data['tgl_lahir'] ?? '';
-        gender = (data['gender'] != null && data['gender'].isNotEmpty)
-            ? data['gender']
-            : 'laki-laki';
-        _avatarUrl = data['avatar_url'];
-        isLoading = false;
-      });
-    } else {
-      // gagal scraping -> tetap tampilkan dari cache biar gak kosong total
-      setState(() {
-        usernameController.text = prefs.getString("nama") ?? "";
-        emailController.text = prefs.getString("email") ?? "";
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _pickAvatar() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _pickedAvatar = File(picked.path));
-    }
+    setState(() {
+      usernameController.text = prefs.getString("nama") ?? "";
+      emailController.text = prefs.getString("email") ?? "";
+      phoneController.text = prefs.getString("telepon") ?? "";
+      birthDateController.text = prefs.getString("tanggal_lahir") ?? "";
+      gender = prefs.getString("gender") ?? "laki-laki";
+      isLoading = false;
+    });
   }
 
   Future<void> _saveProfile() async {
     setState(() => isSaving = true);
     try {
-      Uint8List? oldAvatarBytes;
-      if (_pickedAvatar == null && _avatarUrl != null) {
-        final resp = await http.get(Uri.parse(_avatarUrl!));
-        if (resp.statusCode == 200) oldAvatarBytes = resp.bodyBytes;
-      }
+      final prefs = await SharedPreferences.getInstance();
+      // Mengambil ID dari prefs (dikonversi ke string untuk antisipasi)
+      final userId =
+          prefs.getInt("id")?.toString() ?? prefs.getString("id") ?? "0";
 
-      final success = await ApiService.updateProfileMultipart(
-        username: _oldUsername,
-        newUsername: usernameController.text,
-        email: emailController.text,
-        noTlp: phoneController.text,
-        tglLahir: birthDateController.text,
+      await ApiService.updateProfile(
+        userId: userId,
+        username: usernameController.text,
+        phone: phoneController.text,
+        birthDate: birthDateController.text,
         gender: gender,
-        newAvatarFile: _pickedAvatar,
-        oldAvatarBytes: oldAvatarBytes,
       );
 
-      if (success) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("nama", usernameController.text);
-        _oldUsername =
-            usernameController.text; // update biar load berikutnya benar
-      }
+      await prefs.setString("nama", usernameController.text);
+      await prefs.setString("telepon", phoneController.text);
+      await prefs.setString("tanggal_lahir", birthDateController.text);
+      await prefs.setString("gender", gender);
 
       if (!mounted) return;
       setState(() => isEditing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success ? 'Profil berhasil diperbarui' : 'Gagal memperbarui profil',
-          ),
-        ),
+        const SnackBar(content: Text('Profil berhasil diperbarui')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -212,37 +168,15 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                     child: Column(
                       children: [
-                        GestureDetector(
-                          onTap: isEditing ? _pickAvatar : null,
-                          child: CircleAvatar(
-                            radius: 43,
-                            backgroundColor: const Color(0xFF7B3FA0),
-                            backgroundImage: _pickedAvatar != null
-                                ? FileImage(_pickedAvatar!)
-                                : (_avatarUrl != null
-                                          ? NetworkImage(_avatarUrl!)
-                                          : null)
-                                      as ImageProvider?,
-                            child: (_pickedAvatar == null && _avatarUrl == null)
-                                ? const Icon(
-                                    Icons.person,
-                                    size: 48,
-                                    color: Colors.white,
-                                  )
-                                : null,
+                        const CircleAvatar(
+                          radius: 43,
+                          backgroundColor: Color(0xFF7B3FA0),
+                          child: Icon(
+                            Icons.person,
+                            size: 48,
+                            color: Colors.white,
                           ),
                         ),
-                        if (isEditing)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6),
-                            child: Text(
-                              'Ketuk foto untuk ganti',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
                         const SizedBox(height: 22),
                         _field(
                           label: 'Username',
@@ -260,30 +194,52 @@ class _AccountScreenState extends State<AccountScreen> {
                           controller: phoneController,
                           hint: 'Masukkan no telepon',
                         ),
-                        GestureDetector(
-                          onTap: isEditing
-                              ? () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(1950),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (picked != null) {
-                                    setState(() {
-                                      birthDateController.text =
-                                          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-                                    });
-                                  }
-                                }
-                              : null,
-                          child: AbsorbPointer(
-                            child: _field(
-                              label: 'Tanggal Lahir',
-                              controller: birthDateController,
-                              hint: 'Pilih tanggal',
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Tanggal Lahir',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF7B3FA0),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: birthDateController,
+                              readOnly: true,
+                              enabled: isEditing,
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(1950),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    birthDateController.text =
+                                        "${picked.day}-${picked.month}-${picked.year}";
+                                  });
+                                }
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Pilih tanggal',
+                                filled: true,
+                                fillColor: isEditing
+                                    ? Colors.white
+                                    : Colors.grey.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                suffixIcon: const Icon(
+                                  Icons.calendar_today_outlined,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                          ],
                         ),
                         const Align(
                           alignment: Alignment.centerLeft,
@@ -312,24 +268,13 @@ class _AccountScreenState extends State<AccountScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7B3FA0),
                             ),
-                            onPressed: isSaving
-                                ? null
-                                : (isEditing
-                                      ? _saveProfile
-                                      : () => setState(() => isEditing = true)),
-                            child: isSaving
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    isEditing ? 'Simpan' : 'Ubah Profil',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
+                            onPressed: isEditing
+                                ? _saveProfile
+                                : () => setState(() => isEditing = true),
+                            child: Text(
+                              isEditing ? 'Simpan' : 'Ubah Profil',
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ],

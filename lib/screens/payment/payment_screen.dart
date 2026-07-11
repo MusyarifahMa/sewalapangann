@@ -31,19 +31,55 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   final Map<String, List<Map<String, dynamic>>> bankOptions = {
     'Transfer': [
-      {'name': 'BCA', 'color': const Color(0xFF0066AE)},
-      {'name': 'Mandiri', 'color': const Color(0xFF003087)},
-      {'name': 'BRI', 'color': const Color(0xFF00529B)},
-      {'name': 'BNI', 'color': const Color(0xFF004B87)},
+      {
+        'name': 'BCA',
+        'color': const Color(0xFF0066AE),
+        'logo': 'assets/images/bca.png',
+      },
+      {
+        'name': 'Mandiri',
+        'color': const Color(0xFF003087),
+        'logo': 'assets/images/mandiri.png',
+      },
+      {
+        'name': 'BRI',
+        'color': const Color(0xFF00529B),
+        'logo': 'assets/images/bri.png',
+      },
+      {
+        'name': 'BNI',
+        'color': const Color(0xFF004B87),
+        'logo': 'assets/images/bni.png',
+      },
     ],
     'Ewallet': [
-      {'name': 'OVO', 'color': const Color(0xFF4C3494)},
-      {'name': 'GoPay', 'color': const Color(0xFF00AED6)},
-      {'name': 'Dana', 'color': const Color(0xFF118EEA)},
-      {'name': 'ShopeePay', 'color': const Color(0xFFEE4D2D)},
+      {
+        'name': 'OVO',
+        'color': const Color(0xFF4C3494),
+        'logo': 'assets/images/ovo.png',
+      },
+      {
+        'name': 'GoPay',
+        'color': const Color(0xFF00AED6),
+        'logo': 'assets/images/gopay.png',
+      },
+      {
+        'name': 'Dana',
+        'color': const Color(0xFF118EEA),
+        'logo': 'assets/images/dana.png',
+      },
+      {
+        'name': 'ShopeePay',
+        'color': const Color(0xFFEE4D2D),
+        'logo': 'assets/images/Shopeepay.png',
+      },
     ],
     'Qris': [
-      {'name': 'QRIS', 'color': const Color(0xFFCC0001)},
+      {
+        'name': 'QRIS',
+        'color': const Color(0xFFCC0001),
+        'logo': 'assets/images/qris.png',
+      },
     ],
   };
 
@@ -95,7 +131,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final booking = await ApiService.createBooking(
         userId: userId.toString(),
         pelanggan: nama ?? "Pelanggan",
-        whatsapp: "-",
+        whatsapp: prefs.getString("telepon") ?? "-",
         namaLapangan: widget.namaLapangan,
         tanggal: widget.tanggal,
         jam: widget.jam,
@@ -271,12 +307,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ? Border.all(color: const Color(0xFF7B3FA0), width: 2)
                           : null,
                     ),
-                    child: Center(
-                      child: Text(
-                        b["name"],
-                        style: TextStyle(
-                          color: b["color"] as Color,
-                          fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset(
+                        b["logo"] as String,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Text(
+                            b["name"] as String,
+                            style: TextStyle(
+                              color: b["color"] as Color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),

@@ -71,9 +71,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Silakan login terlebih dahulu"),
-        ),
+        const SnackBar(content: Text("Silakan login terlebih dahulu")),
       );
       return;
     }
@@ -108,8 +106,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       if (!mounted) return;
 
-      final bookingId =
-          booking["id"]?.toString() ?? "-";
+      final bookingId = booking["data"]?["id"]?.toString() ?? "-";
 
       showDialog(
         context: context,
@@ -130,21 +127,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     color: Color(0xFF7B3FA0),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 40),
                 ),
 
                 const SizedBox(height: 20),
 
                 const Text(
                   "Pembayaran Berhasil",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 20),
@@ -153,8 +143,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFF7B3FA0),
+                      backgroundColor: const Color(0xFF7B3FA0),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -164,11 +153,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         MaterialPageRoute(
                           builder: (_) => StrukScreen(
                             kode: bookingId,
-                            pelanggan:
-                                nama ?? "Pelanggan",
+                            pelanggan: nama ?? "Pelanggan",
                             whatsapp: "-",
-                            namaLapangan:
-                                widget.namaLapangan,
+                            namaLapangan: widget.namaLapangan,
                             tanggal: widget.tanggal,
                             jam: widget.jam,
                             paket: widget.paket,
@@ -180,12 +167,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     },
                     child: const Text(
                       "Lihat Struk",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -194,13 +179,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Gagal menyimpan pesanan : $e",
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal menyimpan pesanan : $e")));
     } finally {
       if (mounted) {
         setState(() {
@@ -216,31 +197,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFDCC2E8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFDCC2E8),
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: const Color(0xFFDCC2E8), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               "Metode Pembayaran",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 15),
 
             Row(
-              children: [
-                "Transfer",
-                "Ewallet",
-                "Qris",
-              ].map((m) {
+              children: ["Transfer", "Ewallet", "Qris"].map((m) {
                 final active = metode == m;
 
                 return GestureDetector(
@@ -251,31 +222,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     });
                   },
                   child: Container(
-                    margin:
-                        const EdgeInsets.only(
-                      right: 10,
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(
+                    margin: const EdgeInsets.only(right: 10),
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 15,
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: active
-                          ? const Color(
-                              0xFF7B3FA0)
-                          : Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(
-                        20,
-                      ),
+                      color: active ? const Color(0xFF7B3FA0) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       m,
                       style: TextStyle(
-                        color: active
-                            ? Colors.white
-                            : Colors.black,
+                        color: active ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
@@ -287,11 +246,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             GridView.builder(
               shrinkWrap: true,
-              physics:
-                  const NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: banks.length,
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -309,28 +266,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(
-                        12,
-                      ),
-                      border: bank ==
-                              b["name"]
-                          ? Border.all(
-                              color:
-                                  const Color(
-                                      0xFF7B3FA0),
-                              width: 2,
-                            )
+                      borderRadius: BorderRadius.circular(12),
+                      border: bank == b["name"]
+                          ? Border.all(color: const Color(0xFF7B3FA0), width: 2)
                           : null,
                     ),
                     child: Center(
                       child: Text(
                         b["name"],
                         style: TextStyle(
-                          color:
-                              b["color"] as Color,
-                          fontWeight:
-                              FontWeight.bold,
+                          color: b["color"] as Color,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -346,19 +292,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFF7B3FA0),
+                  backgroundColor: const Color(0xFF7B3FA0),
                 ),
-                onPressed:
-                    isSaving ? null : _bayar,
+                onPressed: isSaving ? null : _bayar,
                 child: Text(
-                  isSaving
-                      ? "MENYIMPAN..."
-                      : "BAYAR",
+                  isSaving ? "MENYIMPAN..." : "BAYAR",
                   style: const TextStyle(
                     color: Colors.white,
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

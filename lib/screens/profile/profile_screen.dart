@@ -58,15 +58,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Colors.white.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_rounded, color: Colors.white, size: 38),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Colors.white,
+              size: 38,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(username, style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                Text(email, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+                Text(
+                  username,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
               ],
             ),
           ),
@@ -75,13 +92,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _menuCard({required IconData icon, required String title, required VoidCallback onTap, Color iconColor = const Color(0xFF7B3FA0)}) {
+  Widget _menuCard({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color iconColor = const Color(0xFF7B3FA0),
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+        ),
         child: Row(
           children: [
             Icon(icon, color: iconColor),
@@ -97,16 +122,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFDCC2E8),
-      appBar: AppBar(backgroundColor: const Color(0xFFDCC2E8), title: const Text('Profile')),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFDCC2E8),
+        title: const Text('Profile'),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             _profileHeader(),
             const SizedBox(height: 24),
-            _menuCard(icon: Icons.account_circle, title: 'Akun Saya', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountScreen()))),
-            _menuCard(icon: Icons.timelapse, title: 'Pesanan Berjalan', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OngoingScreen()))),
-            _menuCard(icon: Icons.history, title: 'Riwayat Pesanan', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()))),
+            _menuCard(
+              icon: Icons.account_circle,
+              title: 'Akun Saya',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountScreen()),
+              ),
+            ),
+            _menuCard(
+              icon: Icons.timelapse,
+              title: 'Pesanan Berjalan',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OngoingScreen()),
+              ),
+            ),
+            _menuCard(
+              icon: Icons.history,
+              title: 'Riwayat Pesanan',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HistoryScreen()),
+              ),
+            ),
           ],
         ),
       ),

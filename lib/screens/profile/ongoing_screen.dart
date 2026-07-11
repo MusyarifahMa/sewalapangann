@@ -39,10 +39,15 @@ class _OngoingScreenState extends State<OngoingScreen> {
 
     try {
       final all = await ApiService.getBookings(userId.toString());
-      final proses = all.where((b) => b['status'] == 'proses').toList();
-      
-      proses.sort((a, b) =>
-          (b['created_at'] ?? '').toString().compareTo((a['created_at'] ?? '').toString()));
+      final proses = all
+          .where((b) => b['status'] == 'pending' || b['status'] == 'proses')
+          .toList();
+
+      proses.sort(
+        (a, b) => (b['created_at'] ?? '').toString().compareTo(
+          (a['created_at'] ?? '').toString(),
+        ),
+      );
 
       setState(() {
         _bookings = proses;
@@ -56,33 +61,12 @@ class _OngoingScreenState extends State<OngoingScreen> {
     }
   }
 
-  String _formatRupiah(int amount) {
-    final str = amount.toString();
-    final buffer = StringBuffer();
-    for (int i = 0; i < str.length; i++) {
-      if (i > 0 && (str.length - i) % 3 == 0) buffer.write('.');
-      buffer.write(str[i]);
-    }
-    return 'Rp.${buffer.toString()}';
-  }
-
-  Future<void> _tandaiSelesai(BuildContext context, int bookingId) async {
-    await ApiService.tandaiSelesai(bookingId);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pesanan dipindahkan ke History')),
-    );
-    _loadBookings();
-  }
-
   Widget _card(BuildContext context, Map<String, dynamic> data) {
     final tanggal = (data['tanggal'] ?? '-').toString();
     final lapangan = (data['nama_lapangan'] ?? '-').toString();
     final jam = (data['jam'] ?? '-').toString();
-    final paket = (data['paket'] ?? '-').toString();
-    final metodeBayar = (data['metode_bayar'] ?? '-').toString();
-    final hargaRaw = data['harga'] ?? 0;
-    final int harga = (hargaRaw is int) ? hargaRaw : int.tryParse(hargaRaw.toString()) ?? 0;
+    final paket = (data['jenis_paket'] ?? '-').toString();
+    final status = (data['status'] ?? '-').toString();
     final int bookingId = int.tryParse(data['id'].toString()) ?? 0;
 
     return Container(
@@ -96,40 +80,77 @@ class _OngoingScreenState extends State<OngoingScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.black54),
-            const SizedBox(width: 8),
-            Text(tanggal, style: const TextStyle(fontSize: 13, color: Colors.black54)),
-          ]),
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_today_outlined,
+                size: 16,
+                color: Colors.black54,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                tanggal,
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
-          Row(children: [
-            const Icon(Icons.sports_soccer_outlined, size: 16, color: Colors.black54),
-            const SizedBox(width: 8),
-            Expanded(child: Text(lapangan, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
-          ]),
+          Row(
+            children: [
+              const Icon(
+                Icons.sports_soccer_outlined,
+                size: 16,
+                color: Colors.black54,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  lapangan,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 6),
-          Row(children: [
-            const Icon(Icons.access_time_outlined, size: 16, color: Colors.black54),
-            const SizedBox(width: 8),
-            Expanded(child: Text('$jam • $paket', style: const TextStyle(fontSize: 14))),
-          ]),
-          const SizedBox(height: 6),
-          Row(children: [
-            const Icon(Icons.payment_outlined, size: 16, color: Colors.black54),
-            const SizedBox(width: 8),
-            Expanded(child: Text('$metodeBayar • ${_formatRupiah(harga)}', style: const TextStyle(fontSize: 13, color: Colors.black54))),
-          ]),
+          Row(
+            children: [
+              const Icon(
+                Icons.access_time_outlined,
+                size: 16,
+                color: Colors.black54,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$jam • $paket',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
-          Row(children: [
-            Container(width: 12, height: 12, decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle)),
-            const SizedBox(width: 6),
-            const Text('proses', style: TextStyle(fontSize: 13, color: Colors.amber)),
-            const Spacer(),
-            TextButton(
-              onPressed: () => _tandaiSelesai(context, bookingId),
-              child: const Text('Tandai selesai'),
-            ),
-          ]),
+          Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.amber,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                status,
+                style: const TextStyle(fontSize: 13, color: Colors.amber),
+              ),
+              const Spacer(),
+              
+            ],
+          ),
         ],
       ),
     );
@@ -146,25 +167,37 @@ class _OngoingScreenState extends State<OngoingScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: const Text('Berjalan', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+        title: const Text(
+          'Berjalan',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh, color: Colors.black87), onPressed: _loadBookings),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.black87),
+            onPressed: _loadBookings,
+          ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!))
-              : _bookings.isEmpty
-                  ? const Center(child: Text('Belum ada pesanan berjalan', style: TextStyle(fontSize: 15, color: Colors.black54)))
-                  : RefreshIndicator(
-                      onRefresh: _loadBookings,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: _bookings.length,
-                        itemBuilder: (context, index) => _card(context, _bookings[index]),
-                      ),
-                    ),
+          ? Center(child: Text(_error!))
+          : _bookings.isEmpty
+          ? const Center(
+              child: Text(
+                'Belum ada pesanan berjalan',
+                style: TextStyle(fontSize: 15, color: Colors.black54),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadBookings,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: _bookings.length,
+                itemBuilder: (context, index) =>
+                    _card(context, _bookings[index]),
+              ),
+            ),
     );
   }
 }

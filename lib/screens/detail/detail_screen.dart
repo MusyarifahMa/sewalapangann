@@ -30,10 +30,7 @@ class DetailScreen extends StatelessWidget {
         ),
         onPressed: onTap,
         icon: Icon(icon, color: Colors.white),
-        label: Text(
-          title,
-          style: const TextStyle(color: Colors.white),
-        ),
+        label: Text(title, style: const TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -51,75 +48,81 @@ class DetailScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  image,
-                  height: 230,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 15),
-              Text(
-                namaLapangan,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 30),
-              
-              // Menu Detail Jadwal
-              menuButton(
-                icon: Icons.calendar_month,
-                title: "Detail Jadwal",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const JadwalScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              // Menu Lokasi
-              menuButton(
-                icon: Icons.location_on,
-                title: "Lokasi Lapangan",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LokasiScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              // Menu Pesan Lapangan (DIPERBAIKI)
-              menuButton(
-                icon: Icons.event_note,
-                title: "Pesan Lapangan",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BookingScreen(
-                        image: image,
-                        namaLapangan: namaLapangan, // <-- DATA INI HARUS DIKIRIM
-                      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double aspectRatio = constraints.maxWidth > 600 ? 2.0 : 0.9;
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      image,
+                      height: 230,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    namaLapangan,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Menu Detail Jadwal
+                  menuButton(
+                    icon: Icons.calendar_month,
+                    title: "Detail Jadwal",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const JadwalScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Menu Lokasi
+                  menuButton(
+                    icon: Icons.location_on,
+                    title: "Lokasi Lapangan",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LokasiScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Menu Pesan Lapangan
+                  menuButton(
+                    icon: Icons.event_note,
+                    title: "Pesan Lapangan",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BookingScreen(
+                            image: image,
+                            namaLapangan:
+                                namaLapangan, 
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -190,7 +190,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           builder: (_) => StrukScreen(
                             kode: bookingId,
                             pelanggan: nama ?? "Pelanggan",
-                            whatsapp: "-",
+                            whatsapp: prefs.getString("telepon") ?? "-",
                             namaLapangan: widget.namaLapangan,
                             tanggal: widget.tanggal,
                             jam: widget.jam,

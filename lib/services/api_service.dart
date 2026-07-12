@@ -3,9 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://10.0.2.2/projek_mobile/public";
+  static const String baseUrl = "http://localhost/projek_mobile/public";
 
-  // Update Profil (simpan lokal)
   static Future<Map<String, dynamic>> updateProfile({
     required String userId,
     required String username,
@@ -14,11 +13,18 @@ class ApiService {
     required String gender,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("nama", username);
-    await prefs.setString("telepon", phone);
-    await prefs.setString("tanggal_lahir", birthDate);
-    await prefs.setString("gender", gender);
-    return {"status": 200, "message": "Profil berhasil diperbarui"};
+    final email = prefs.getString("email") ?? "";
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/profile/$userId"),
+      body: {
+        "username": username,
+        "email": email,
+        "no_tlp": phone,
+        "tgl_lahir": birthDate,
+        "gender": gender,
+      },
+    );
+    return jsonDecode(response.body);
   }
 
   // Post umum
@@ -30,9 +36,8 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  // Get user
   static Future<Map<String, dynamic>?> getUser(String userId) async {
-    final response = await http.get(Uri.parse("$baseUrl/api/user/$userId"));
+    final response = await http.get(Uri.parse("$baseUrl/api/profile/$userId"));
     return jsonDecode(response.body);
   }
 

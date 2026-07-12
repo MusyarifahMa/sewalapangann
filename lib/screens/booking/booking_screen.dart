@@ -34,12 +34,22 @@ class _BookingScreenState extends State<BookingScreen> {
     "Jum'at - Minggu": [5, 6, 7],
   };
 
+  final Map<String, List<String>> jamPerHari = {
+    'Senin - Kamis': ['08.00', '10.00'],
+    "Jum'at - Minggu": ['16.00', '19.00'],
+  };
+
   @override
   void initState() {
     super.initState();
-    jam = widget.jamDefault ?? '10.00';
-    if (!daftarJam.contains(jam)) {
-      daftarJam.add(jam);
+    if (widget.hariDefault != null &&
+        jamPerHari.containsKey(widget.hariDefault!)) {
+      final jamTersedia = jamPerHari[widget.hariDefault!]!;
+      jam = widget.jamDefault ?? jamTersedia.first;
+      if (!jamTersedia.contains(jam)) jam = jamTersedia.first;
+    } else {
+      jam = widget.jamDefault ?? '10.00';
+      if (!daftarJam.contains(jam)) daftarJam.add(jam);
     }
   }
 
@@ -163,19 +173,33 @@ class _BookingScreenState extends State<BookingScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFF7B3FA0)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: Color(0xFF7B3FA0),
-                      size: 16,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Color(0xFF7B3FA0),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Hari: ${widget.hariDefault}',
+                          style: const TextStyle(
+                            color: Color(0xFF7B3FA0),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(height: 4),
                     Text(
-                      'Hanya bisa booking hari: ${widget.hariDefault}',
+                      'Jam tersedia: ${jamPerHari[widget.hariDefault!]?.join(', ') ?? '-'}',
                       style: const TextStyle(
                         color: Color(0xFF7B3FA0),
-                        fontSize: 13,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -196,13 +220,18 @@ class _BookingScreenState extends State<BookingScreen> {
             DropdownButtonFormField<String>(
               value: jam,
               decoration: _dec('Pilih Jam', Icons.access_time_outlined),
-              items: daftarJam
-                  .map((j) => DropdownMenuItem(value: j, child: Text(j)))
-                  .toList(),
+              items:
+                  (widget.hariDefault != null &&
+                              jamPerHari.containsKey(widget.hariDefault!)
+                          ? jamPerHari[widget.hariDefault!]!
+                          : daftarJam)
+                      .map((j) => DropdownMenuItem(value: j, child: Text(j)))
+                      .toList(),
               onChanged: (v) => setState(() => jam = v!),
             ),
-            const SizedBox(height: 14),
 
+            const SizedBox(height: 14),
+            
             DropdownButtonFormField<String>(
               value: paket,
               decoration: _dec('Paket Durasi', Icons.timer_outlined),

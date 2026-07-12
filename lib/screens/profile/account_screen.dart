@@ -29,14 +29,39 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt("id")?.toString() ?? "0";
+
     setState(() {
       usernameController.text = prefs.getString("nama") ?? "";
       emailController.text = prefs.getString("email") ?? "";
-      phoneController.text = prefs.getString("telepon") ?? "";
-      birthDateController.text = prefs.getString("tanggal_lahir") ?? "";
-      gender = prefs.getString("gender") ?? "laki-laki";
-      isLoading = false;
     });
+
+    try {
+      final data = await ApiService.getUser(userId);
+      if (data != null && data['data'] != null) {
+        final user = data['data'];
+        setState(() {
+          phoneController.text = user['no_tlp'] ?? "";
+          birthDateController.text = user['tgl_lahir'] ?? "";
+          gender = user['gender'] ?? "laki-laki";
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          phoneController.text = prefs.getString("telepon") ?? "";
+          birthDateController.text = prefs.getString("tanggal_lahir") ?? "";
+          gender = prefs.getString("gender") ?? "laki-laki";
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        phoneController.text = prefs.getString("telepon") ?? "";
+        birthDateController.text = prefs.getString("tanggal_lahir") ?? "";
+        gender = prefs.getString("gender") ?? "laki-laki";
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -47,7 +72,7 @@ class _AccountScreenState extends State<AccountScreen> {
       final userId =
           prefs.getInt("id")?.toString() ?? prefs.getString("id") ?? "0";
 
-      await ApiService.updateProfile(
+      final result = await ApiService.updateProfile(
         userId: userId,
         username: usernameController.text,
         phone: phoneController.text,
@@ -220,7 +245,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 if (picked != null) {
                                   setState(() {
                                     birthDateController.text =
-                                        "${picked.day}-${picked.month}-${picked.year}";
+                                        "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
                                   });
                                 }
                               },
